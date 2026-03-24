@@ -2,7 +2,8 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+from google import genai
+from langchain_core.runnables import RunnableLambda
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
@@ -36,11 +37,18 @@ if not api_key:
 @st.cache_resource
 def load_rag_pipeline():
     # LLM
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        api_key=api_key
-    )
+    client = genai.Client(api_key=api_key)
 
+    def invoke_gemini(prompt_value):
+        messages = prompt_value.to_messages()
+        combined_prompt = "\n\n".join([msg.content for msg in messages])
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=combined_prompt
+        )
+        return response.text
+
+    llm = RunnableLambda(invoke_gemini)
     # Embeddings
     embeddings = FastEmbedEmbeddings(
         model_name="thenlper/gte-large"
