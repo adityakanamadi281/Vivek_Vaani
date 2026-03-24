@@ -10,11 +10,11 @@
 - **PDF Document Processing:** Automatically extracts and chunks text from the source PDF securely on the local machine.
 
 ## 🛠️ Tech Stack
-- **Frontend:** [Streamlit](https://streamlit.io/)
-- **LLM Engine:** [Google Gemini API](https://ai.google.dev/) (`genai.Client`)
-- **Embeddings:** [FastEmbed](https://qdrant.github.io/fastembed/) (`thenlper/gte-large`)
-- **Vector Database:** [Chroma](https://www.trychroma.com/)
-- **Orchestration:** [LangChain](https://www.langchain.com/) (Document loaders, Text Splitters, Output Parsers)
+- **Frontend:** [chat with vivek vaani](https://vivek-vaani.streamlit.app/)
+- **LLM Engine:** Google Gemini API (`genai.Client`)
+- **Embeddings:** FastEmbed (`thenlper/gte-large`)
+- **Vector Database:** ChromaDB
+- **Orchestration:** LangChain (Document loaders, Text Splitters, Output Parsers)
 
 ## 🚀 Getting Started
 
@@ -62,3 +62,7 @@ After running the command, an interface will open in your default browser where 
 - `src/`: Directory containing inference scripts and custom logic.
 - `data/`: Directory for storing source documents like the target PDF.
 - `chroma_db/`: Directory where the persistent vector database is saved.
+
+
+## Deployment
+[Vivek Vaani](https://vivek-vaani.streamlit.app/)
