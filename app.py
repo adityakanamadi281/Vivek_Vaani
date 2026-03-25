@@ -39,16 +39,18 @@ def load_rag_pipeline():
     # LLM
     client = genai.Client(api_key=api_key)
 
-    def invoke_gemini(prompt_value):
+    def stream_gemini(prompt_value):
         messages = prompt_value.to_messages()
         combined_prompt = "\n\n".join([msg.content for msg in messages])
-        response = client.models.generate_content(
+        response = client.models.generate_content_stream(
             model="gemini-2.5-flash",
             contents=combined_prompt
         )
-        return response.text
+        for chunk in response:
+            yield chunk.text
 
-    llm = RunnableLambda(invoke_gemini)
+    llm = RunnableLambda(stream_gemini)
+
     # Embeddings
     embeddings = FastEmbedEmbeddings(
         model_name="thenlper/gte-large"
@@ -152,12 +154,12 @@ if user_query:
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             try:
-                response = rag_chain.invoke({"query": user_query})
-                st.markdown(response)
+                response_stream = rag_chain.stream({"query": user_query})
+                full_response = st.write_stream(response_stream)
                 
                 # Add assistant response to chat history
                 st.session_state.messages.append(
-                    {"role": "assistant", "content": response}
+                    {"role": "assistant", "content": full_response}
                 )
             except Exception as e:
                 error_msg = f"Sorry, an error occurred: {str(e)}"
