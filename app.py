@@ -43,49 +43,14 @@ def load_rag_pipeline():
         messages = prompt_value.to_messages()
         combined_prompt = "\n\n".join([msg.content for msg in messages])
         
-        fallback_models = [
-            "gemini-flash-latest",
-            "gemini-2.5-flash-lite",
-            "gemini-pro-latest",
-            "gemini-3-pro-preview",
-            "gemini-3-flash-preview",
-            "gemini-3.1-pro-preview",
-            "gemini-3.1-flash-lite-preview"
-        ]
+        response = client.models.generate_content_stream(
+            model="gemini-2.5-flash",
+            contents=combined_prompt
+        )
         
-        last_error = None
-        for model in fallback_models:
-            try:
-                response = client.models.generate_content_stream(
-                    model=model,
-                    contents=combined_prompt
-                )
-                
-                # Fetch first chunk to trigger the API and catch quota errors (429) early
-                iterator = iter(response)
-                try:
-                    first_chunk = next(iterator)
-                except StopIteration:
-                    return
-                except Exception as stream_err:
-                    last_error = stream_err
-                    continue
-                    
-                # Setup streaming if first chunk succeeds
-                yield first_chunk.text
-                for chunk in iterator:
-                    yield chunk.text
-                
-                # Successful generation, exit the function loop
-                return
-                
-            except Exception as call_err:
-                last_error = call_err
-                continue
-                
-        # If all 4 models fail
-        if last_error:
-            raise last_error
+        for chunk in response:
+            if chunk.text:
+                yield chunk.text
 
     llm = RunnableLambda(stream_gemini)
 
